@@ -1,0 +1,50 @@
+<a id="button_restore" title="" class="btn btn-success"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
+<template id="template-restore">
+    <div class="form-group">
+        <label>{{entry_date}}</label>
+        <select class="form-control" name="restore_date">
+            {% for value in times %}
+                <option value="{{value}}">{{value}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group text-center">
+        <a id="button-restore-submit" class="btn btn-primary" data-loading-text="Loading...">{{button_restore}}</a>
+    </div>
+</template>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#button_restore').tooltip({
+            title : '{{button_restore}}',
+            container: 'body',
+            html: true
+        });
+        $('#button_restore').popover({
+            animation : true,
+            title : '{{text_title_restore}}',
+            html : true,
+            trigger : 'click',
+            placement : 'bottom',
+            content : $('template#template-restore').html()
+        });
+        $(document).on('click', '#button-restore-submit', function(){
+            $(this).button('loading');
+            var send_data = {
+                'datetime' : $('select[name=restore_date]').val(),
+                'config_name' : 'product',
+                'id' : '{{product_id}}'
+            }
+            $.ajax({
+                url:'{{restore_url}}',
+                dataType:'json',
+                type:'post',
+                data:send_data,
+                context:this,
+                success:function(){
+                    location.reload()
+                }
+            });
+        });
+    });
+    
+</script>

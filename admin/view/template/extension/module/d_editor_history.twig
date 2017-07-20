@@ -1,0 +1,153 @@
+{{header}}{{column_left}}
+<div id="content">
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="form-inline pull-right">
+                <button id="save_and_stay" data-toggle="tooltip" title="{{button_save_and_stay}}" class="btn btn-success"><i class="fa fa-save"></i></button>
+                <button type="submit" form="form-editor-history" data-toggle="tooltip" title="{{button_save}}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+                <a href="{{cancel}}" data-toggle="tooltip" title="{{button_cancel}}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+            </div>
+            <h1>{{heading_title}} {{version}}</h1>
+            <ul class="breadcrumb">
+                {% for breadcrumb in breadcrumbs %}
+                    <li><a href="{{breadcrumb.href}}">{{breadcrumb.text}}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% if error.warning %}
+            <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{error.warning}}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        {% if success %}
+            <div class="alert alert-success"><i class="fa fa-exclamation-circle"></i> {{success}}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endif %}
+        
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil"></i> {{text_edit}}</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <form action="{{action}}" method="post" enctype="multipart/form-data" id="form-editor-history" class="form-horizontal">
+                            <div class="h2">Setting</div>
+                            <div class="form-group">
+                                <label class="control-label col-sm-2">{{entry_status}}</label>
+                                <div class="col-sm-10">
+                                    <input type="hidden" name="{{codename}}_status" value="0" />
+                                    <input type="checkbox" class="form-control switcher" data-title="123" name="{{codename}}_status" {{d_editor_history_status ? "checked='checked'"}} value="1"/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{entry_use_editor_history}}</label>
+                                <div class="col-sm-10">
+                                    <div class="well well-sm" style="height: 150px; overflow: auto;">
+                                        {% for key, value in modules %}
+                                            <div class="checkbox">
+                                                <label>
+                                                    {% if key in setting.use %}
+                                                        <input type="checkbox" name="{{codename}}_setting[use][]" value="{{key}}" checked="checked" /> {{value}}
+                                                    {% else %}
+                                                        <input type="checkbox" name="{{codename}}_setting[use][]" value="{{key}}" /> {{value}}
+                                                    {% endif %}
+                                                </label>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <a onclick="$(this).parent().find(':checkbox').prop('checked', true);" style="cursor:pointer;">{{text_select_all}}</a> / <a onclick="$(this).parent().find(':checkbox').prop('checked', false);" style="cursor:pointer;">{{text_unselect_all}}</a>
+                                    <br/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="h2">Restore</div>
+                        <form action="{{restore}}" class="form-horizontal" method="post" enctype="multipart/form-data" id="form-restore-editor-history">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{entry_availability_date}}</label>
+                                <div class="col-sm-10">
+                                    <div id="availability-date" style="height: 35px; padding: 8px 13px;"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{entry_datetime}}</label>
+                                <div class="col-sm-4">
+                                    <div class='input-group date'>
+                                        <input type='text' name="datetime" class="form-control" value="{{'now'|date('Y-m-d H:i')}}" data-date-format="YYYY-MM-DD HH:mm" placeholder="{{entry_datetime}}" />
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default" type="button"><i class="fa fa-calendar"></i></button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{entry_module}}</label>
+                                <div class="col-sm-10">
+                                    <select name="module" class="form-control">
+                                        {% for key, value in time_modules %}
+                                            <option value="{{key}}" data-start="{{value.start}}" data-end="{{value.end}}">{{value.name}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" form="form-restore-editor-history" class="btn btn-primary"><i class="fa fa-undo"></i> {{button_restore}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.date').datetimepicker({
+            icons: {
+                time: "fa fa-clock-o",
+                date: "fa fa-calendar",
+                up: "fa fa-arrow-up",
+                down: "fa fa-arrow-down"
+            }
+        });
+
+        $(".switcher").bootstrapSwitch({
+            'onColor': 'success',
+            'onText': '{{text_yes}}',
+            'offText': '{{text_no}}',
+        });
+
+        $(document).on('change', 'select[name=module]', function(e){
+            start_date = $("option:selected", this).data('start');
+            end_date = $("option:selected", this).data('end');
+            $('#availability-date').html(start_date + ' - ' + end_date);
+        });
+
+        $('select[name=module]').trigger('change');
+
+        $('body').on('click', '#save_and_stay', function(){
+            $.ajax( {
+                type: 'post',
+                url: $('#form-editor-history').attr('action') + '&save',
+                data: $('#form-editor-history').serialize(),
+                beforeSend: function() {
+                    $('#form-editor-history').fadeTo('slow', 0.5);
+                },
+                complete: function() {
+                    $('#form-editor-history').fadeTo('slow', 1);
+                },
+                success: function( response ) {
+                    console.log( response );
+                }
+            });
+        });
+    });
+</script>
+<?php echo $footer; ?>

@@ -1,0 +1,80 @@
+{
+    "codename": "d_editor_history",
+    "version": "1.0.0",
+    "name": "Editor History",
+    "description": "This is the base for your tipical module. Use  this as a guide to make an awesome module.",
+    "index": "extension/module/d_editor_history",
+    "author": {
+        "name": "Shopunity",
+        "email": "info@shopunity.com",
+        "url": "https://shopunity.net/"
+    },
+    "opencart_version": [
+        "2.0.0.0",
+        "2.0.1.0",
+        "2.0.1.1",
+        "2.0.2.0",
+        "2.0.3.1",
+        "2.1.0.1",
+        "2.1.0.2",
+        "2.2.0.0",
+        "2.3.0.0",
+        "2.3.0.1",
+        "2.3.0.2",
+        "3.0.0.0",
+        "3.0.0.1"
+    ],
+    "mbooth_version": "^4.0.0",
+    "type": "module",
+    "license": {
+        "type": "free",
+        "url": "https://shopunity.net/licenses/free"
+    },
+    "install": {
+        "url": "extension/module/install&extension=d_editor_history"
+    },
+    "uninstall": {
+        "url": "extension/module/uninstall&extension=d_editor_history"
+    },
+    "support": {
+        "email": "support@shopunity.com",
+        "url": "https://shopunity.net/"
+    },
+    "required": {
+        "d_shopunity": ">=3.1.1",
+        "d_twig": ">=1.0.0",
+        "d_twig_manager": ">= 1.4.1"
+    },
+    "files": [
+        "system/library/d_shopunity/extension/d_editor_history.json",
+
+        "admin/controller/extension/d_editor_history_module/product.php",
+        "admin/language/en-gb/extension/d_editor_history_module/product.php",
+        "admin/language/english/extension/d_editor_history_module/product.php",
+        "admin/view/template/extension/d_editor_history_module/product.twig",
+        "admin/view/template/extension/d_editor_history_module/product_visual_designer.twig",
+
+        "catalog/controller/extension/d_editor_history_module/product.php",
+
+        "system/config/d_editor_history/product.php",
+        
+        "admin/controller/extension/module/d_editor_history.php",
+        "admin/language/en-gb/extension/module/d_editor_history.php",
+        "admin/language/english/module/d_editor_history.php",
+        "admin/model/extension/module/d_editor_history.php",
+        "admin/view/template/extension/module/d_editor_history.twig",
+        "catalog/model/extension/module/d_editor_history.php",
+        "system/config/d_editor_history.php",
+
+
+    ],
+    "dirs": [
+        "admin/view/image/d_editor_history",
+    ],
+    "changelog": [
+        {
+            "varsion":"1.0.0",
+            "change": "First version"
+        }
+    ]
+}
