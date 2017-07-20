@@ -43,6 +43,8 @@
     "required": {
         "d_shopunity": ">=3.1.1",
         "d_twig": ">=1.0.0",
+        "d_simple_html_dom": ">= 1.0.4",
+        "d_event_manager": ">= 1.1.4",
         "d_twig_manager": ">= 1.4.1"
     },
     "files": [

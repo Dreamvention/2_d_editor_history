@@ -144,7 +144,9 @@ class ModelExtensionModuleDEditorHistory extends Model {
 
         if($query->num_rows){
             foreach ($query->rows as $row) {
-                $history_data[$row['config_name']] = array('start' => $row['date_start'], 'end' => $row['date_end']);
+                if(file_exists(DIR_CONFIG.$this->codename.'/'.$row['config_name'].'.php')){
+                    $history_data[$row['config_name']] = array('start' => $row['date_start'], 'end' => $row['date_end']);
+                }
             }
         }
         
@@ -239,7 +241,7 @@ class ModelExtensionModuleDEditorHistory extends Model {
      * Writes the specified content for the specified item to the history
      */
     protected function writeContentToHistory($config_name, $id, $field, $content, $date_backup, $language_id = false){
-        
+
         $this->db->query("INSERT INTO `".DB_PREFIX."deh_history` SET 
             `config_name` = '".$config_name."',
             `id` = '".$id."',". 

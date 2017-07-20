@@ -127,6 +127,12 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['text_confirm'] = $this->language->get('text_confirm');
         $data['text_select_all'] = $this->language->get('text_select_all');
         $data['text_unselect_all'] = $this->language->get('text_unselect_all');
+        $data['text_none'] = $this->language->get('text_none');
+        $data['text_no_data'] = $this->language->get('text_no_data');
+        $data['text_install_event_support'] = $this->language->get('text_install_event_support');
+        $data['text_setting'] = $this->language->get('text_setting');
+        $data['text_backup'] = $this->language->get('text_backup');
+        $data['text_restore'] = $this->language->get('text_restore');
 
         $data['entry_status'] = $this->language->get('entry_status');
         $data['entry_use_editor_history'] = $this->language->get('entry_use_editor_history');
@@ -134,14 +140,20 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['entry_module'] = $this->language->get('entry_module');
         $data['entry_availability_date'] = $this->language->get('entry_availability_date');
 
+        $data['help_event_support'] = $this->language->get('help_event_support');
+
         $data['button_save'] = $this->language->get('button_save');
         $data['button_save_and_stay'] = $this->language->get('button_save_and_stay');
         $data['button_cancel'] = $this->language->get('button_cancel');
         $data['button_restore'] = $this->language->get('button_restore');
+        $data['button_backup'] = $this->language->get('button_backup');
 
         $data['module_link'] = $this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL');
         $data['action'] = $this->url->link($this->route, $this->token_name.'='.$this->token . $url, 'SSL');
         $data['restore'] = $this->url->link($this->route.'/restore', $this->token_name.'='.$this->token . $url, 'SSL');
+        $data['backup'] = $this->url->link($this->route.'/backup', $this->token_name.'='.$this->token . $url, 'SSL');
+
+        $data['install_event_support'] = $this->url->link($this->route.'/install_event_support', 'token=' . $this->session->data['token'], 'SSL');
         
         if(VERSION>='2.3.0.0'){
             $data['cancel'] = $this->url->link('extension/extension', $this->token_name.'='.$this->token.'&type=module', 'SSL');
@@ -164,7 +176,6 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['setting'] = $this->model_extension_d_shopunity_setting->getSetting($this->codename);
 
         $this->load->model('setting/store');
-
 
         // Breadcrumbs
         $data['breadcrumbs'] = array(); 
@@ -190,6 +201,11 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             'href' => $this->url->link($this->route, $this->token_name.'='.$this->token . $url, 'SSL')
             );
 
+        if(!empty($this->session->data['warning'])){
+            $this->error['warning'] = $this->session->data['warning'];
+            unset($this->session->data['warning']);
+        }
+
         foreach($this->error as $key => $error){
             $data['error'][$key] = $error;
         }
@@ -207,6 +223,18 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             $module_setting = $this->{'model_extension_module_'.$this->codename}->getModuleSetting($key);
             $value['name'] = $module_setting['name'];
         });
+
+        if(VERSION>='2.3.0.0'){
+            $data['event_support'] = true;
+        }
+        else{
+            $event_support = (file_exists(DIR_SYSTEM.'mbooth/extension/d_event_manager.json'));
+            $data['event_support'] = false;
+            if($event_support){
+                $this->load->model('extension/d_shopunity/ocmod');
+                $data['event_support'] = $this->model_extension_d_shopunity_ocmod->getModificationByName('d_event_manager');
+            }
+        }
 
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
@@ -236,14 +264,45 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         if(isset($this->request->post['datetime'])){
             $datetime = $this->request->post['datetime'];
         }
+        else{
+            $error = $this->language->get('error_restore');
+        }
 
         if(isset($this->request->post['module'])){
             $module = $this->request->post['module'];
+            if($module == '*'){
+                $error = $this->language->get('error_no_data');
+            }
+        }
+        else{
+            $error = $this->language->get('error_restore');
         }
 
-        if(isset($module) && isset($datetime)){
+        if(!isset($error)){
             $this->{'model_extension_module_'.$this->codename}->restore($module, $datetime);
             $this->session->data['success'] = $this->language->get('text_restore_success');
+        }
+        else{
+            $this->session->data['warning'] = $error;
+        }
+
+        $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
+    }
+
+    public function backup(){
+        if(!empty($this->request->post['module'])){
+            $module = $this->request->post['module'];
+        }
+        else{
+            $error = $this->language->get('error_backup');
+        }
+
+        if(!isset($error)){
+            $this->{'model_extension_module_'.$this->codename}->backup($module);
+            $this->session->data['success'] = $this->language->get('text_backup_success');
+        }
+        else{
+            $this->session->data['warning'] = $error;
         }
 
         $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
