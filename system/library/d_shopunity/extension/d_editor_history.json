@@ -64,12 +64,12 @@
         "admin/model/extension/module/d_editor_history.php",
         "admin/view/template/extension/module/d_editor_history.twig",
         "catalog/model/extension/module/d_editor_history.php",
-        "system/config/d_editor_history.php",
+        "system/config/d_editor_history.php"
 
 
     ],
     "dirs": [
-        "admin/view/image/d_editor_history",
+        "admin/view/image/d_editor_history"
     ],
     "changelog": [
         {
