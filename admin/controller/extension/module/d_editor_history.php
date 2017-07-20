@@ -65,6 +65,7 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         if(!$twig_support){
             $this->load->model('extension/module/d_twig_manager');
             $this->model_extension_module_d_twig_manager->installCompatibility();
+            $this->response->redirect($this->url->link($this->route, 'token='.$this->session->data['token'], 'SSL'));
         }
         
         $this->load->model('setting/setting');
