@@ -38,6 +38,14 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
             return;
         }
 
+        array_walk($data['times'], function(&$v, &$k){
+            $v['name'] = $v['date_added'];
+
+            if($v['draft']){
+                $v['name'] .= ' ('.$this->language->get('text_draft').')';
+            }
+        });
+
         $this->load->model('localisation/language');
 
         $data['languages'] = $this->model_localisation_language->getLanguages();

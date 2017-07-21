@@ -173,14 +173,11 @@ class ModelExtensionModuleDEditorHistory extends Model {
         $results = array();
 
         if($query->num_rows){
-            $this->load->language($this->route);
             foreach ($query->rows as $row) {
-                if($row['draft']){
-                    $results[] = $row['date_added'].'('.$this->language->get('text_draft').')';
-                }
-                else{
-                    $results[] = $row['date_added'];
-                }
+                $results[] = array(
+                    'date_added' => $row['date_added'],
+                    'draft' => $row['draft'],
+                    );
             }
         }
 

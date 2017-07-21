@@ -1,5 +1,6 @@
 <?php
 $_['text_title']         = 'Product description';
+$_['text_draft']         = 'Draft';
 
 $_['text_title_restore'] = 'Restore description';
 
