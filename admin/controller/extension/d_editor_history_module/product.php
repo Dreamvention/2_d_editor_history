@@ -38,6 +38,10 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
             return;
         }
 
+        $this->load->model('localisation/language');
+
+        $data['languages'] = $this->model_localisation_language->getLanguages();
+
         $data['text_title_restore'] = $this->language->get('text_title_restore');
 
         $data['button_restore'] = $this->language->get('button_restore');
@@ -47,6 +51,7 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
         $data['product_id'] = $this->request->get['product_id'];
 
         $data['restore_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/restoreItem', $this->token_name.'='.$this->token, 'SSL'));
+        $data['draft_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/draftItem', $this->token_name.'='.$this->token, 'SSL'));
 
         $html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext = $this->load->view($this->route.(VERSION < '2.2.0.0'?'.twig':''), $data).$html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext;
         $output = (string)$html_dom;

@@ -15,6 +15,7 @@ $_['text_no_data']               = 'No data to restore';
 $_['text_backup']                = 'Backup';
 $_['text_restore']               = 'Restore data';
 $_['text_setting']               = 'Setting';
+$_['text_draft']                 = 'Draft';
 
 //entry
 $_['entry_status']               = 'Status';

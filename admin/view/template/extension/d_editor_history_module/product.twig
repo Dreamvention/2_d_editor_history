@@ -14,6 +14,46 @@
 </template>
 <script type="text/javascript">
     $(document).ready(function(){
+        setInterval(function(){
+            if(typeof window.content_description == 'undefined'){
+                window.content_description = [];
+            }
+            {% for language in languages %}
+            var content = $("textarea[name='product_description[{{language.language_id}}][description]']").val();
+
+            if( typeof window.content_description['{{language.language_id}}'] != 'undefined'){
+                
+                if(content.localeCompare(window.content_description['{{language.language_id}}']) != 0){
+                    window.content_description['{{language.language_id}}'] = content;
+                    addDraft(content, '{{language.language_id}}', 'description');
+                }
+            }
+            else{
+                window.content_description['{{language.language_id}}'] = content;
+            }
+            {% endfor %}
+        }, 1000);
+
+        function addDraft(content, language_id, field){
+            var send_data = {
+                'datetime' : $('select[name=restore_date]').val(),
+                'config_name' : 'product',
+                'language_id' : language_id,
+                'field' : field,
+                'content' : content,
+                'id' : '{{product_id}}'
+            }
+            $.ajax({
+                url:'{{draft_url}}',
+                dataType:'json',
+                type:'post',
+                data:send_data,
+                context:this,
+                success:function(){
+                }
+            });
+        }
+
         $('#button_restore').tooltip({
             title : '{{button_restore}}',
             container: 'body',

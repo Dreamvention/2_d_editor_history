@@ -348,6 +348,53 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $this->response->setOutput(json_encode($json));
     }
 
+    public function draftItem(){
+        $json = array();
+
+        if(isset($this->request->post['config_name'])){
+            $config_name = $this->request->post['config_name'];
+        }
+        else{
+            $json['error'] = 'error';
+        }
+
+        if(isset($this->request->post['id'])){
+            $id = $this->request->post['id'];
+        }
+        else{
+            $json['error'] = 'error';
+        }
+
+        if(isset($this->request->post['content'])){
+            $content = $this->request->post['content'];
+        }
+        else{
+            $json['error'] = 'error';
+        }
+
+        if(isset($this->request->post['field'])){
+            $field = $this->request->post['field'];
+        }
+        else{
+            $json['error'] = 'error';
+        }
+
+        if(isset($this->request->post['language_id'])){
+            $language_id = $this->request->post['language_id'];
+        }
+        else{
+            $language_id = null;
+        }
+
+        if(!isset($json['error'])){
+            $this->{'model_extension_module_'.$this->codename}->draftItem($config_name, $id, $field, $content, $language_id);
+            $json['success'] = 'success';
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
 
     private function validate($permission = 'modify') {
 

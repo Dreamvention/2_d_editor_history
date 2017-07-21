@@ -5,6 +5,7 @@
 
 class ModelExtensionModuleDEditorHistory extends Model {
     public $codename = 'd_editor_history';
+    public $route = 'extension/module/d_editor_history';
 
     /**
      * Creating tables when installing the module
@@ -17,7 +18,8 @@ class ModelExtensionModuleDEditorHistory extends Model {
             `language_id` INT(11) NOT NULL,
             `field` VARCHAR(256) NOT NULL,
             `content` LONGTEXT NOT NULL,
-            `date_added` DATETIME NOT NULL
+            `date_added` DATETIME NOT NULL,
+            `draft` TINYINT(4) NOT NULL
             )
             COLLATE='utf8_general_ci' ENGINE=InnoDB;");
     }
@@ -98,7 +100,7 @@ class ModelExtensionModuleDEditorHistory extends Model {
                     unset($row_data['language_id']);
 
                     foreach ($row_data as $column_name => $column_value) {
-                        $this->writeContentToHistory($config_name, $id, $column_name, $column_value, $date_backup, $language_id);
+                        $this->writeContentToHistory($config_name, $id, $column_name, $column_value, $date_backup, 0, $language_id);
                     }
                 }
             }
@@ -110,7 +112,7 @@ class ModelExtensionModuleDEditorHistory extends Model {
 
             if($query->num_rows){
                 foreach ($query->row as $column_name => $column_value) {
-                    $this->writeContentToHistory($config_name, $id, $column_name, $date_backup, $column_value);
+                    $this->writeContentToHistory($config_name, $id, $column_name, $date_backup, $column_value, 0);
                 }
             }
         }
@@ -131,6 +133,15 @@ class ModelExtensionModuleDEditorHistory extends Model {
                 $this->backupItem($config_name, $row['id'], $date_backup);
             }
         }
+    }
+
+    /**
+     * Adds a draft to the history for the specified item
+     */
+    public function draftItem($config_name, $id, $field, $content, $language_id = null){
+
+        $this->writeContentToHistory($config_name, $id, $field, $content, date("Y-m-d H:i:s"), 1, $language_id);
+        
     }
 
     /**
@@ -157,13 +168,19 @@ class ModelExtensionModuleDEditorHistory extends Model {
      * Returns the available recovery dates for the specified item
      */
     public function getAvailableRecoveryDatesForItem($config_name, $id){
-        $query = $this->db->query("SELECT `date_added` FROM `".DB_PREFIX."deh_history` WHERE `config_name` = '".$config_name."' AND `id` = '".$id."' ORDER BY `date_added` DESC");
+        $query = $this->db->query("SELECT `date_added`, `draft` FROM `".DB_PREFIX."deh_history` WHERE `config_name` = '".$config_name."' AND `id` = '".$id."' ORDER BY `date_added` DESC");
 
         $results = array();
 
         if($query->num_rows){
+            $this->load->language($this->route);
             foreach ($query->rows as $row) {
-                $results[] = $row['date_added'];
+                if($row['draft']){
+                    $results[] = $row['date_added'].'('.$this->language->get('text_draft').')';
+                }
+                else{
+                    $results[] = $row['date_added'];
+                }
             }
         }
 
@@ -240,7 +257,9 @@ class ModelExtensionModuleDEditorHistory extends Model {
     /**
      * Writes the specified content for the specified item to the history
      */
-    protected function writeContentToHistory($config_name, $id, $field, $content, $date_backup, $language_id = false){
+    protected function writeContentToHistory($config_name, $id, $field, $content, $date_backup, $draft, $language_id = false){
+
+        $this->db->query("DELETE FROM `".DB_PREFIX."deh_history` WHERE `id` = '".$id."' AND `config_name` = '".$config_name."' AND `language_id` = '".$language_id."' AND `field` = '".$field."' AND `draft` = '1'");
 
         $this->db->query("INSERT INTO `".DB_PREFIX."deh_history` SET 
             `config_name` = '".$config_name."',
@@ -248,11 +267,14 @@ class ModelExtensionModuleDEditorHistory extends Model {
             ($language_id?"`language_id` = '".$language_id."', ":'')."
             `content` = '".$this->db->escape($content)."',
             `field` = '".$field."',
-            `date_added` = '".$date_backup."'");
+            `date_added` = '".$date_backup."',
+            `draft` = '".$draft."'");
 
-        $query = $this->db->query("SELECT count(*) as total FROM `".DB_PREFIX."deh_history` deh WHERE `deh`.`config_name` = '".$config_name."' AND `field` = '".$field."' AND `deh`.`id` = '".$id."'");
-        if($query->row['total'] > 20){
-            $this->db->query("DELETE FROM `".DB_PREFIX."deh_history` WHERE `config_name` = '".$config_name."'AND `field` = '".$field."' AND `id` = '".$id."' ORDER BY `date_added` ASC LIMIT ".($query->row['total']-20));
+        if(!$draft){
+            $query = $this->db->query("SELECT count(*) as total FROM `".DB_PREFIX."deh_history` deh WHERE `deh`.`config_name` = '".$config_name."' AND `field` = '".$field."' AND `deh`.`id` = '".$id."'");
+            if($query->row['total'] > 20){
+                $this->db->query("DELETE FROM `".DB_PREFIX."deh_history` WHERE `config_name` = '".$config_name."'AND `field` = '".$field."' AND `id` = '".$id."' ORDER BY `date_added` ASC LIMIT ".($query->row['total']-20));
+            }
         }
     }
 }
