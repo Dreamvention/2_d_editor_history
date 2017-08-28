@@ -46,7 +46,6 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $this->load->model('extension/d_opencart_patch/user');
         
         $this->load->model('setting/setting');
-        $this->load->model('extension/module');
         $this->load->model('extension/d_shopunity/setting');
 
         if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
@@ -204,20 +203,20 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
     }
 
     public function installEvents($status){
-        $this->load->model('extension/d_shopunity/event');
+        $this->load->model('extension/d_opencart_patch/event');
         foreach ($status as $value) {
             $module_setting = $this->{'model_extension_module_'.$this->codename}->getModuleSetting($value);
             if(!empty($module_setting['events'])){
                 foreach ($module_setting['events'] as $trigger => $action) {
-                    $this->model_extension_d_shopunity_event->addEvent($this->codename, $trigger, $action);
+                    $this->model_extension_d_opencart_patch_event->addEvent($this->codename, $trigger, $action);
                 }
             }
         }
     }
 
     public function uninstallEvents(){
-        $this->load->model('extension/d_shopunity/event');
-        $this->model_extension_d_shopunity_event->deleteEvent($this->codename);
+        $this->load->model('extension/d_opencart_patch/event');
+        $this->model_extension_d_opencart_patch_event->deleteEvent($this->codename);
     }
 
     public function restore(){
