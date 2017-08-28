@@ -11,7 +11,7 @@
         <label>{{entry_date}}</label>
         <select class="form-control" name="restore_date">
             {% for value in times %}
-                <option value="{{value}}">{{value}}</option>
+                <option value="{{value.date_added}}"  data-draft="{{value.draft}}">{{value.name}}</option>
             {% endfor %}
         </select>
     </div>

@@ -81,6 +81,14 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
             return;
         }
 
+        array_walk($data['times'], function(&$v, &$k){
+            $v['name'] = $v['date_added'];
+
+            if($v['draft']){
+                $v['name'] .= ' ('.$this->language->get('text_draft').')';
+            }
+        });
+
         $data['text_title_restore'] = $this->language->get('text_title_restore');
 
         $data['button_restore'] = $this->language->get('button_restore');
@@ -89,9 +97,9 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
 
         $data['product_id'] = $this->request->get['id'];
 
-        $data['restore_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/restoreItem'));
+        $data['restore_url'] = str_replace('&amp;', '&', $this->model_extension_d_opencart_patch_url->link('extension/module/'.$this->codename.'/restoreItem'));
 
-        $html_dom->find('.vd-navbar', 0)->innertext .= $this->load->view($this->route.'_visual_designer', $data);
+        $html_dom->find('.vd-navbar', 0)->innertext .= $this->model_extension_d_opencart_patch_load->view($this->route.'_visual_designer', $data);
         $output = (string)$html_dom;
     }
 }
