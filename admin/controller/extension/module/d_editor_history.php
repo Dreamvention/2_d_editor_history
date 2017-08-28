@@ -12,61 +12,38 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
     private $store_id = 0;
     private $error = array();
 
-    private $token = '';
-    private $token_name = '';
-
-
     public function __construct($registry) {
         parent::__construct($registry);
         $this->load->model($this->route);
         $this->load->language($this->route);
 
         $this->d_shopunity = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_shopunity.json'));
+        $this->d_opencart_patch = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_opencart_patch.json'));
+        $this->d_twig_manager = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_twig_manager.json'));
+
         $this->extension = json_decode(file_get_contents(DIR_SYSTEM.'library/d_shopunity/extension/'.$this->codename.'.json'), true);
         $this->store_id = (isset($this->request->get['store_id'])) ? $this->request->get['store_id'] : 0;
-
-        $this->token_name = VERSION >= '3.0.0.0'?'user_token':'token';
-        $this->token = VERSION >= '3.0.0.0'?$this->session->data['user_token']:$this->session->data['token'];
-
-    }
-
-    public function required(){
-
-        $this->document->setTitle($this->language->get('heading_title_main'));
-        $data['heading_title'] = $this->language->get('heading_title_main');
-        $data['text_not_found'] = $this->language->get('text_not_found');
-        $data['breadcrumbs'] = array();
-
-        $data['header'] = $this->load->controller('common/header');
-        $data['column_left'] = $this->load->controller('common/column_left');
-        $data['footer'] = $this->load->controller('common/footer');
-
-        $this->request->get['extension'] = $this->codename;
-        if(VERSION >= '2.3.0.0'){
-            $this->load->controller('extension/extension/module/uninstall');
-        }else{
-            $this->load->controller('extension/module/uninstall');
-        }
-        $this->response->setOutput($this->load->view('error/not_found'.(VERSION < '2.2.0.0'?'.twig':''), $data));
     }
 
     public function index(){
-        if(!$this->d_shopunity){
-            $this->response->redirect($this->url->link($this->route.'/required', 'codename=d_shopunity&'.$this->token_name.'='.$this->token, 'SSL'));
-        }
-
-        $this->load->model('extension/d_shopunity/mbooth');
-        $this->model_extension_d_shopunity_mbooth->validateDependencies($this->codename);
-
-        $this->load->model('extension/d_shopunity/ocmod');
-        
-        $twig_support = $this->model_extension_d_shopunity_ocmod->getModificationByName('d_twig_manager');
-
-        if(!$twig_support){
+        if($this->d_twig_manager){
             $this->load->model('extension/module/d_twig_manager');
-            $this->model_extension_module_d_twig_manager->installCompatibility();
-            $this->response->redirect($this->url->link($this->route, 'token='.$this->session->data['token'], 'SSL'));
+            if(!$this->model_extension_module_d_twig_manager->isCompatible()){
+                $this->model_extension_module_d_twig_manager->installCompatibility();
+                $this->load->language('extension/module/d_visual_designer'); 
+                $this->session->data['success'] = $this->language->get('success_twig_compatible');
+                $this->load->model('extension/d_opencart_patch/url');
+                $this->response->redirect($this->model_extension_d_opencart_patch_url->link('marketplace/extension', 'type=module'));
+            } 
         }
+        if($this->d_shopunity){
+            $this->load->model('extension/d_shopunity/mbooth');
+            $this->model_extension_d_shopunity_mbooth->validateDependencies($this->codename);
+        }
+
+        $this->load->model('extension/d_opencart_patch/url');
+        $this->load->model('extension/d_opencart_patch/load');
+        $this->load->model('extension/d_opencart_patch/user');
         
         $this->load->model('setting/setting');
         $this->load->model('extension/module');
@@ -84,12 +61,7 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
 
             $this->session->data['success'] = $this->language->get('text_success');
 
-            if(VERSION>='2.3.0.0'){
-                $this->response->redirect($this->url->link('extension/extension', $this->token_name.'='.$this->token.'&type=module', 'SSL'));
-            }
-            else{
-                $this->response->redirect($this->url->link('extension/module', $this->token_name.'='.$this->token, 'SSL'));
-            }
+            $this->response->redirect($this->model_extension_d_opencart_patch_url->link('marketplace/extension','type=module'));
             
         }
 
@@ -116,7 +88,6 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['codename'] = $this->codename;
         $data['route'] = $this->route;
         $data['version'] = $this->extension['version'];
-        $data[$this->token_name] = $this->token;
         $data['d_shopunity'] = $this->d_shopunity;
         
         $data['text_enabled'] = $this->language->get('text_enabled');
@@ -149,19 +120,14 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['button_restore'] = $this->language->get('button_restore');
         $data['button_backup'] = $this->language->get('button_backup');
 
-        $data['module_link'] = $this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL');
-        $data['action'] = $this->url->link($this->route, $this->token_name.'='.$this->token . $url, 'SSL');
-        $data['restore'] = $this->url->link($this->route.'/restore', $this->token_name.'='.$this->token . $url, 'SSL');
-        $data['backup'] = $this->url->link($this->route.'/backup', $this->token_name.'='.$this->token . $url, 'SSL');
+        $data['module_link'] = $this->model_extension_d_opencart_patch_url->link($this->route);
+        $data['action'] = $this->model_extension_d_opencart_patch_url->link($this->route, $url);
+        $data['restore'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/restore',$url);
+        $data['backup'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/backup', $url);
 
-        $data['install_event_support'] = $this->url->link($this->route.'/install_event_support', 'token=' . $this->session->data['token'], 'SSL');
+        $data['install_event_support'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/install_event_support');
         
-        if(VERSION>='2.3.0.0'){
-            $data['cancel'] = $this->url->link('extension/extension', $this->token_name.'='.$this->token.'&type=module', 'SSL');
-        }
-        else{
-            $data['cancel'] = $this->url->link('extension/module', $this->token_name.'='.$this->token, 'SSL');
-        }
+        $data['cancel'] = $this->model_extension_d_opencart_patch_url->link('marketplace/extension','type=module');
 
         if (isset($this->request->post[$this->codename.'_status'])) {
             $data[$this->codename.'_status'] = $this->request->post[$this->codename.'_status'];
@@ -182,24 +148,17 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['breadcrumbs'] = array(); 
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('text_home'),
-            'href' => $this->url->link('common/home', $this->token_name.'='.$this->token, 'SSL')
+            'href' => $this->model_extension_d_opencart_patch_url->link('common/home')
             );
-        if(VERSION>='2.3.0.0'){
-            $data['breadcrumbs'][] = array(
-                'text'      => $this->language->get('text_module'),
-                'href'      => $this->url->link('extension/extension', $this->token_name.'='.$this->token.'&type=module', 'SSL')
-                );
-        }
-        else{
-            $data['breadcrumbs'][] = array(
-                'text'      => $this->language->get('text_module'),
-                'href'      => $this->url->link('extension/module', $this->token_name.'='.$this->token, 'SSL')
-                );
-        }
+
+        $data['breadcrumbs'][] = array(
+            'text'      => $this->language->get('text_module'),
+            'href'      => $this->model_extension_d_opencart_patch_url->link('marketplace/extension', 'type=module')
+            );
         
         $data['breadcrumbs'][] = array(
             'text' => $this->language->get('heading_title_main'),
-            'href' => $this->url->link($this->route, $this->token_name.'='.$this->token . $url, 'SSL')
+            'href' => $this->model_extension_d_opencart_patch_url->link($this->route, $url)
             );
 
         if(!empty($this->session->data['warning'])){
@@ -241,7 +200,7 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
 
-        $this->response->setOutput($this->load->view($this->route.(VERSION < '2.2.0.0'?'.twig':''), $data));
+        $this->response->setOutput($this->model_extension_d_opencart_patch_load->view($this->route, $data));
     }
 
     public function installEvents($status){
@@ -262,6 +221,7 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
     }
 
     public function restore(){
+        $this->load->model('extension/d_opencart_patch/url');
         if(isset($this->request->post['datetime'])){
             $datetime = $this->request->post['datetime'];
         }
@@ -287,10 +247,11 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             $this->session->data['warning'] = $error;
         }
 
-        $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
+        $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
     }
 
     public function backup(){
+        $this->load->model('extension/d_opencart_patch/url');
         if(!empty($this->request->post['module'])){
             $module = $this->request->post['module'];
         }
@@ -306,19 +267,20 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             $this->session->data['warning'] = $error;
         }
 
-        $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
+        $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
     }
 
     public function install_event_support(){
+        $this->load->model('extension/d_opencart_patch/url');
         if (!$this->user->hasPermission('modify', $this->route)) {
             $this->session->data['error'] = $this->language->get('error_permission');
-            $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
+            $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
         }
         if(file_exists(DIR_SYSTEM.'mbooth/extension/d_event_manager.json')){
             $this->load->model('module/d_event_manager');
             $this->model_module_d_event_manager->installCompatibility();
         }
-        $this->response->redirect($this->url->link($this->route, $this->token_name.'='.$this->token, 'SSL'));
+        $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
     }
 
     public function restoreItem(){

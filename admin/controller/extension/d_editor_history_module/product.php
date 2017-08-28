@@ -8,17 +8,10 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
     private $codename = 'd_editor_history';
     private $route = 'extension/d_editor_history_module/product';
 
-    private $token = '';
-    private $token_name = '';
-
-
     public function __construct($registry) {
         parent::__construct($registry);
         $this->load->model('extension/module/'.$this->codename);
         $this->load->language($this->route);
-
-        $this->token_name = VERSION >= '3.0.0.0'?'user_token':'token';
-        $this->token = VERSION >= '3.0.0.0'?$this->session->data['user_token']:$this->session->data['token'];
     }
 
     public function model_editProduct_before(&$route, &$data, &$output){
@@ -26,9 +19,14 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
     }
 
     public function view_product_form_after(&$route, &$data, &$output){
+
         if(!isset($this->request->get['product_id'])){
             return;
         }
+
+        $this->load->model('extension/d_opencart_patch/url');
+        $this->load->model('extension/d_opencart_patch/load');
+
         $html_dom = new d_simple_html_dom();
         $html_dom->load((string)$output, $lowercase = true, $stripRN = false, $defaultBRText = DEFAULT_BR_TEXT);
         
@@ -58,17 +56,21 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
 
         $data['product_id'] = $this->request->get['product_id'];
 
-        $data['restore_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/restoreItem', $this->token_name.'='.$this->token, 'SSL'));
-        $data['draft_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/draftItem', $this->token_name.'='.$this->token, 'SSL'));
+        $data['restore_url'] = str_replace('&amp;', '&', $this->model_extension_d_opencart_patch_url->link('extension/module/'.$this->codename.'/restoreItem'));
+        $data['draft_url'] = str_replace('&amp;', '&', $this->model_extension_d_opencart_patch_url->link('extension/module/'.$this->codename.'/draftItem'));
 
-        $html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext = $this->load->view($this->route.(VERSION < '2.2.0.0'?'.twig':''), $data).$html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext;
+        $html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext = $this->model_extension_d_opencart_patch_load->view($this->route, $data).$html_dom->find('#content > div.page-header > div.container-fluid > div.pull-right', 0)->innertext;
         $output = (string)$html_dom;
     }
 
     public function view_vd_frontend_after(&$route, &$data, &$output){
+
         if($this->request->get['route_config'] != 'product'){
             return;
         }
+
+        $this->load->model('extension/d_opencart_patch/url');
+        $this->load->model('extension/d_opencart_patch/load');
 
         $html_dom = new d_simple_html_dom();
         $html_dom->load((string)$output, $lowercase = true, $stripRN = false, $defaultBRText = DEFAULT_BR_TEXT);
@@ -87,9 +89,9 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
 
         $data['product_id'] = $this->request->get['id'];
 
-        $data['restore_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/restoreItem', $this->token_name.'='.$this->token, 'SSL'));
+        $data['restore_url'] = str_replace('&amp;', '&', $this->url->link('extension/module/'.$this->codename.'/restoreItem'));
 
-        $html_dom->find('.vd-navbar', 0)->innertext .= $this->load->view($this->route.'_visual_designer'.(VERSION < '2.2.0.0'?'.twig':''), $data);
+        $html_dom->find('.vd-navbar', 0)->innertext .= $this->load->view($this->route.'_visual_designer', $data);
         $output = (string)$html_dom;
     }
 }
