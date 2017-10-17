@@ -31,6 +31,7 @@ $_['button_backup']              = 'Backup';
 $_['help_event_support']         = '<h4>Activate Event support</h4><p>Visual Designer uses the latest Opencart Events mechanism instead of Vqmod/Ocmod. Old version of Opencart do not support events but you can enable them here. Click install Events. </p>';
 
 //success
+$_['success_twig_compatible']  = 'Success: Twig support enabled. Please go to Editor History!';
 $_['success_modifed']            = 'Success: You have modified module eBay featured!';
 
 //error

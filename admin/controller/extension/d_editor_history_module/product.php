@@ -13,7 +13,7 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
         $this->load->model('extension/module/'.$this->codename);
         $this->load->language($this->route);
     }
-
+    
     public function model_editProduct_before(&$route, &$data, &$output){
         $this->{'model_extension_module_'.$this->codename}->backupItem('product', $data[0]);
     }
@@ -31,10 +31,6 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
         $html_dom->load((string)$output, $lowercase = true, $stripRN = false, $defaultBRText = DEFAULT_BR_TEXT);
         
         $data['times'] = $this->{'model_extension_module_'.$this->codename}->getAvailableRecoveryDatesForItem('product', $this->request->get['product_id']);
-
-        if(empty($data['times'])){
-            return;
-        }
 
         array_walk($data['times'], function(&$v, &$k){
             $v['name'] = $v['date_added'];

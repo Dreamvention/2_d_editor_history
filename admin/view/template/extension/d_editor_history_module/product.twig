@@ -1,3 +1,4 @@
+{% if times %}
 <a id="button_restore" title="" class="btn btn-success"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
 <template id="template-restore">
     <div class="form-group">
@@ -12,6 +13,7 @@
         <a id="button-restore-submit" class="btn btn-primary" data-loading-text="Loading...">{{button_restore}}</a>
     </div>
 </template>
+{% endif %}
 <script type="text/javascript">
     $(document).ready(function(){
         setInterval(function(){
@@ -53,7 +55,7 @@
                 }
             });
         }
-
+        {% if times %}
         $('#button_restore').tooltip({
             title : '{{button_restore}}',
             container: 'body',
@@ -67,6 +69,7 @@
             placement : 'bottom',
             content : $('template#template-restore').html()
         });
+        
         $(document).on('click', '#button-restore-submit', function(){
             $(this).button('loading');
             var send_data = {
@@ -85,6 +88,7 @@
                 }
             });
         });
+        {% endif %}
     });
     
 </script>
