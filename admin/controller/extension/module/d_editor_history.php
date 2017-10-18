@@ -20,22 +20,24 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $this->d_shopunity = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_shopunity.json'));
         $this->d_opencart_patch = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_opencart_patch.json'));
         $this->d_twig_manager = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_twig_manager.json'));
+        $this->d_event_manager = (file_exists(DIR_SYSTEM.'library/d_shopunity/extension/d_event_manager.json'));
 
         $this->extension = json_decode(file_get_contents(DIR_SYSTEM.'library/d_shopunity/extension/'.$this->codename.'.json'), true);
         $this->store_id = (isset($this->request->get['store_id'])) ? $this->request->get['store_id'] : 0;
     }
 
     public function index(){
+
         if($this->d_twig_manager){
             $this->load->model('extension/module/d_twig_manager');
-            if(!$this->model_extension_module_d_twig_manager->isCompatible()){
-                $this->model_extension_module_d_twig_manager->installCompatibility();
-                $this->load->language('extension/module/d_visual_designer'); 
-                $this->session->data['success'] = $this->language->get('success_twig_compatible');
-                $this->load->model('extension/d_opencart_patch/url');
-                $this->response->redirect($this->model_extension_d_opencart_patch_url->link('marketplace/extension', 'type=module'));
-            } 
+            $this->model_extension_module_d_twig_manager->installCompatibility();
         }
+        
+        if ($this->d_event_manager) {
+            $this->load->model('extension/module/d_event_manager');
+            $this->model_extension_module_d_event_manager->installCompatibility();
+        }
+
         if($this->d_shopunity){
             $this->load->model('extension/d_shopunity/mbooth');
             $this->model_extension_d_shopunity_mbooth->validateDependencies($this->codename);
@@ -100,18 +102,20 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['text_unselect_all'] = $this->language->get('text_unselect_all');
         $data['text_none'] = $this->language->get('text_none');
         $data['text_no_data'] = $this->language->get('text_no_data');
-        $data['text_install_event_support'] = $this->language->get('text_install_event_support');
         $data['text_setting'] = $this->language->get('text_setting');
         $data['text_backup'] = $this->language->get('text_backup');
+        $data['text_backup_descritpion'] = $this->language->get('text_backup_description');
         $data['text_restore'] = $this->language->get('text_restore');
+        $data['text_restore_description'] = $this->language->get('text_restore_description');
 
+        $data['tab_setting'] = $this->language->get('tab_setting');
+        $data['tab_backup_and_restore'] = $this->language->get('tab_backup_and_restore');
+        
         $data['entry_status'] = $this->language->get('entry_status');
         $data['entry_use_editor_history'] = $this->language->get('entry_use_editor_history');
         $data['entry_datetime'] = $this->language->get('entry_datetime');
         $data['entry_module'] = $this->language->get('entry_module');
         $data['entry_availability_date'] = $this->language->get('entry_availability_date');
-
-        $data['help_event_support'] = $this->language->get('help_event_support');
 
         $data['button_save'] = $this->language->get('button_save');
         $data['button_save_and_stay'] = $this->language->get('button_save_and_stay');
@@ -123,8 +127,6 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         $data['action'] = $this->model_extension_d_opencart_patch_url->link($this->route, $url);
         $data['restore'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/restore',$url);
         $data['backup'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/backup', $url);
-
-        $data['install_event_support'] = $this->model_extension_d_opencart_patch_url->link($this->route.'/install_event_support');
         
         $data['cancel'] = $this->model_extension_d_opencart_patch_url->link('marketplace/extension','type=module');
 
@@ -183,40 +185,31 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             $value['name'] = $module_setting['name'];
         });
 
-        if(VERSION>='2.3.0.0'){
-            $data['event_support'] = true;
-        }
-        else{
-            $event_support = (file_exists(DIR_SYSTEM.'mbooth/extension/d_event_manager.json'));
-            $data['event_support'] = false;
-            if($event_support){
-                $this->load->model('extension/d_shopunity/ocmod');
-                $data['event_support'] = $this->model_extension_d_shopunity_ocmod->getModificationByName('d_event_manager');
-            }
-        }
-
         $data['header'] = $this->load->controller('common/header');
         $data['column_left'] = $this->load->controller('common/column_left');
         $data['footer'] = $this->load->controller('common/footer');
-
         $this->response->setOutput($this->model_extension_d_opencart_patch_load->view($this->route, $data));
     }
 
     public function installEvents($status){
-        $this->load->model('extension/module/d_event_manager');
-        foreach ($status as $value) {
-            $module_setting = $this->{'model_extension_module_'.$this->codename}->getModuleSetting($value);
-            if(!empty($module_setting['events'])){
-                foreach ($module_setting['events'] as $trigger => $action) {
-                    $this->model_extension_module_d_event_manager->addEvent($this->codename, $trigger, $action);
+        if($this->d_event_manager) {
+            $this->load->model('extension/module/d_event_manager');
+            foreach ($status as $value) {
+                $module_setting = $this->{'model_extension_module_'.$this->codename}->getModuleSetting($value);
+                if(!empty($module_setting['events'])){
+                    foreach ($module_setting['events'] as $trigger => $action) {
+                        $this->model_extension_module_d_event_manager->addEvent($this->codename, $trigger, $action);
+                    }
                 }
             }
         }
     }
 
     public function uninstallEvents(){
-        $this->load->model('extension/module/d_event_manager');
-        $this->model_extension_module_d_event_manager->deleteEvent($this->codename);
+        if($this->d_event_manager) {
+            $this->load->model('extension/module/d_event_manager');
+            $this->model_extension_module_d_event_manager->deleteEvent($this->codename);
+        }
     }
 
     public function restore(){
@@ -266,19 +259,6 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
             $this->session->data['warning'] = $error;
         }
 
-        $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
-    }
-
-    public function install_event_support(){
-        $this->load->model('extension/d_opencart_patch/url');
-        if (!$this->user->hasPermission('modify', $this->route)) {
-            $this->session->data['error'] = $this->language->get('error_permission');
-            $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
-        }
-        if(file_exists(DIR_SYSTEM.'mbooth/extension/d_event_manager.json')){
-            $this->load->model('module/d_event_manager');
-            $this->model_module_d_event_manager->installCompatibility();
-        }
         $this->response->redirect($this->model_extension_d_opencart_patch_url->link($this->route));
     }
 

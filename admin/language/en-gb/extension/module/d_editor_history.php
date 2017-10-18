@@ -1,6 +1,6 @@
 <?php
 /*
- *  location: admin/language
+ *  location:                      admin/language
  */
 
 //heading
@@ -10,11 +10,16 @@ $_['text_edit']                  = 'Edit Editor History settings';
 $_['text_module']                = 'Modules';
 $_['text_restore_success']       = 'The data was successfully restored!';
 $_['text_backup_success']        = 'Backup successful!';
-$_['text_install_event_support'] = 'Install events';
 $_['text_no_data']               = 'No data to restore';
 $_['text_backup']                = 'Backup';
+$_['text_backup_description']    = 'Use this function to backup all the data and create a snapshot that you can restore in the future.';
 $_['text_restore']               = 'Restore data';
+$_['text_restore_description']   = 'Use this function to restore all the data from a previously created backup.';
 $_['text_setting']               = 'Setting';
+$_['text_success']               = 'Success: You have modified settings!';
+
+$_['tab_setting']                = 'Setting';
+$_['tab_backup_and_restore']     = 'Backup & Restore';
 
 //entry
 $_['entry_status']               = 'Status';
@@ -28,10 +33,7 @@ $_['button_save_and_stay']       = 'Save and stay';
 $_['button_restore']             = 'Restore';
 $_['button_backup']              = 'Backup';
 
-$_['help_event_support']         = '<h4>Activate Event support</h4><p>Visual Designer uses the latest Opencart Events mechanism instead of Vqmod/Ocmod. Old version of Opencart do not support events but you can enable them here. Click install Events. </p>';
-
 //success
-$_['success_twig_compatible']  = 'Success: Twig support enabled. Please go to Editor History!';
 $_['success_modifed']            = 'Success: You have modified module eBay featured!';
 
 //error
