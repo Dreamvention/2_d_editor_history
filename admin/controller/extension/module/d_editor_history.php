@@ -67,10 +67,10 @@ class ControllerExtensionModuleDEditorHistory extends Controller {
         }
 
         // styles and scripts
-        $this->document->addStyle('view/stylesheet/shopunity/bootstrap.css');
+        $this->document->addStyle('view/stylesheet/d_bootstrap_extra/bootstrap.css');
         
-        $this->document->addScript('view/javascript/shopunity/bootstrap-switch/bootstrap-switch.min.js');
-        $this->document->addStyle('view/stylesheet/shopunity/bootstrap-switch/bootstrap-switch.css');
+        $this->document->addScript('view/javascript/d_bootstrap_switch/js/bootstrap-switch.min.js');
+        $this->document->addStyle('view/javascript/d_bootstrap_switch/css/bootstrap-switch.css');
 
         // Add more styles, links or scripts to the project is necessary
         $url_params = array();
