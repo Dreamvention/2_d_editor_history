@@ -14,7 +14,7 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
         $this->load->language($this->route);
     }
     
-    public function model_editProduct_before(&$route, &$data, &$output){
+    public function model_editProduct_before(&$route, &$data){
         $this->{'model_extension_module_'.$this->codename}->backupItem('product', $data[0]);
     }
 
