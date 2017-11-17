@@ -7,4 +7,4 @@ $_['text_empty_history'] = 'History is empty';
 
 $_['entry_date']         = 'Date';
 
-$_['button_restore']     = 'Restore data';
+$_['button_restore']     = 'Restore';
