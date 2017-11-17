@@ -45,6 +45,7 @@ class ControllerExtensionDEditorHistoryModuleProduct extends Controller {
         $data['languages'] = $this->model_localisation_language->getLanguages();
 
         $data['text_title_restore'] = $this->language->get('text_title_restore');
+        $data['text_empty_history'] = $this->language->get('text_empty_history');
 
         $data['button_restore'] = $this->language->get('button_restore');
 

@@ -1,5 +1,6 @@
-{% if times %}
+
 <a id="button_restore" title="" class="btn btn-success"><i class="fa fa-clock-o" aria-hidden="true"></i></a>
+{% if times %}
 <template id="template-restore">
     <div class="form-group">
         <label>{{entry_date}}</label>
@@ -12,6 +13,10 @@
     <div class="form-group text-center">
         <a id="button-restore-submit" class="btn btn-primary" data-loading-text="Loading...">{{button_restore}}</a>
     </div>
+</template>
+{% else %}
+<template id="template-restore">
+    <p>{{text_empty_history}}</p>
 </template>
 {% endif %}
 <script type="text/javascript">
@@ -55,7 +60,7 @@
                 }
             });
         }
-        {% if times %}
+        
         $('#button_restore').tooltip({
             title : '{{button_restore}}',
             container: 'body',
@@ -69,7 +74,7 @@
             placement : 'bottom',
             content : $('template#template-restore').html()
         });
-        
+        {% if times %}
         $(document).on('click', '#button-restore-submit', function(){
             $(this).button('loading');
             var send_data = {
