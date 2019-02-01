@@ -1,6 +1,6 @@
 {
     "codename": "d_editor_history",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "name": "Editor History",
     "description": "This is the base for your tipical module. Use  this as a guide to make an awesome module.",
     "index": "extension/module/d_editor_history",
@@ -24,7 +24,8 @@
         "3.0.0.0",
         "3.0.1.1",
         "3.0.1.2",
-        "3.0.2.0"
+        "3.0.2.0",
+        "3.0.3.1"
     ],
     "type": "module",
     "license": {
@@ -74,6 +75,10 @@
         "admin/view/image/d_editor_history"
     ],
     "changelog": [
+        {
+            "varsion": "1.0.1",
+            "change": "Json for OC 3.0.1.1"
+        },
         {
             "varsion":"1.0.0",
             "change": "First version"
